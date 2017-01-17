@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 var (
@@ -15,6 +16,14 @@ var (
 	verbose   = flag.Bool("verbose", false, "enable verbose log")
 	accessLog = flag.Bool("access", false, "enable access log")
 )
+
+type fileInfo struct {
+	Name    string
+	Size    int64
+	Mode    os.FileMode
+	ModTime time.Time
+	IsDir   bool
+}
 
 func main() {
 	flag.Parse()
@@ -24,17 +33,27 @@ func main() {
 	}
 
 	http.HandleFunc("/gopath", func(w http.ResponseWriter, r *http.Request) {
-		l := []string{}
+		dir := filepath.Join(os.Getenv("GOPATH"), "src")
+		if str := r.FormValue("dir"); str != "" {
+			dir = filepath.Join(dir, str)
+		}
 
-		files, err := ioutil.ReadDir(filepath.Join(os.Getenv("GOPATH"), "src"))
+		files, err := ioutil.ReadDir(dir)
 		if err != nil {
 			logf("ReadDir failed: %v", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		for _, file := range files {
-			l = append(l, file.Name())
+		l := []*fileInfo{}
+		for _, f := range files {
+			l = append(l, &fileInfo{
+				Name:    f.Name(),
+				Size:    f.Size(),
+				Mode:    f.Mode(),
+				ModTime: f.ModTime(),
+				IsDir:   f.IsDir(),
+			})
 		}
 
 		b, err := json.MarshalIndent(l, "", "  ")

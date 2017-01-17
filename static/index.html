@@ -21,7 +21,7 @@
             width: 100%;
             margin: 0 auto;
             padding: 0;
-            background-color: #d5dde9;
+            background-color: aliceblue;
         }
   </style>
 </head>
@@ -35,11 +35,11 @@
                 shape: 'ellipse',
                 font: '12px verdana #222',
                 color: {
-                    border: '#888', background: '',
+                    border: '#888', background: 'lightgray',
                     hover: { border: '#05B', background: '' },
                     highlight: { border: '#F1C40F', background: 'lightyellow' },
                 },
-                shadow: {size: 5, x: 0, y: 0},
+                //shadow: {size: 5, x: 0, y: 0},
                 chosen: {
                     label:  function(values, id, selected, hovering) {
                         if (hovering) {
@@ -71,17 +71,19 @@
         var nodeGopath = {
             id: '$GOPATH',
             label: '$GOPATH',
-            borderWidth: 0,
+            borderWidth: 1,
             shape: 'box',
-            font: { size: 16,
-            strokeWidth: 3,
-            strokeColor: '#FFE' },
+            font: {
+                size: 16,
+                strokeWidth: 3,
+                strokeColor: '#FFE',
+                mod: 'bold' },
             chosen: false,
-            shadow: false,
-            mass: 2,
+            //shadow: false,
+            //mass: 2,
             title: '<b>$GOPATH</b>',
             color: {
-                background: 'rgba(0,0,0,0)',
+                background: 'lightyellow',
                 border: '#111'
             }
         };
@@ -92,24 +94,53 @@
         var container = document.getElementById('goexplorer');
         var network = new vis.Network(container, { nodes: nodes, edges: edges }, options);
 
-        var updateGopath = function() {
+        network.on('doubleClick', function(data){
+            if (data && data.nodes && data.nodes.length > 0) {
+                updateNode(nodes.get(data.nodes[0]));
+            }
+        });
+
+        var updateNode = function(node) {
+            if (!node) {
+                console.log("no node", node);
+                return;
+            }
             var r = new XMLHttpRequest();
             r.responseType = "json";
-            r.open("GET", "gopath", true);
+            var p = '?';
+            if (node.dir) {
+                p += 'dir='+node.dir;
+            }
+            console.debug("updateNode:", p);
+            r.open("GET", "/gopath"+p, true);
             r.onreadystatechange = function () {
                 if (r.readyState != 4 || r.status != 200) return;
                 var data = r.response;
                 console.log("gopath success:", data);
-                var list = [];
+                var nodeList = [];
+                var edgeList = [];
+                //edges.clear();
                 for (var i=0; i<data.length; i++) {
-                    var l = data[i];
-                    nodes.update({id: l, label: l});
-                    edges.update({from: nodeGopath.id, to: l})
+                    var f = data[i];
+                    var dir = f.Name;
+                    if (node.dir) {
+                        dir = node.dir+'/'+dir;
+                    }
+                    var n = {id: dir, label: f.Name, shape: 'box', dir: dir, title: dir};
+                    if (f.IsDir) {
+                        n.color = {background: '#BDF'};
+                    }
+                    nodeList.push(n);
+                    var edgeId = node.id + '->' + dir
+                    var e = {id: edgeId, from: node.id, to: dir};
+                    edgeList.push(e);
                 }
+                nodes.update(nodeList);
+                edges.update(edgeList);
             };
             r.send();
         };
-        updateGopath();
+        updateNode(nodeGopath);
     </script>
 </body>
 </html>
