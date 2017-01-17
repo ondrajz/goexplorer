@@ -33,18 +33,57 @@
         var options = {
             nodes: {
                 shape: 'ellipse',
-                font: '14px verdana black',
-                shadow: {size: 3, x: 3, y: 3}
-            }
+                font: '12px verdana #222',
+                color: {
+                    border: '#888', background: '',
+                    hover: { border: '#05B', background: '' },
+                    highlight: { border: '#F1C40F', background: 'lightyellow' },
+                },
+                shadow: {size: 5, x: 0, y: 0},
+                chosen: {
+                    label:  function(values, id, selected, hovering) {
+                        if (hovering) {
+                            values.color = '#000';
+                        }else{
+                            values.color = '#888';
+                        }
+                        if (selected) {
+                            values.mod = 'bold';
+                        }else{
+                            values.mod = '';
+                        }
+                      }
+                }
+            },
+            edges: {
+                color: { color: '#888', hover: '#05B', highlight: '#d6b225', opacity: 0.5 },
+                hoverWidth: function (width) {return width+1;}
+            },
+            physics: {
+                stabilization: false
+            },
+            interaction: {
+                hover: true
+            },
+            configure: true
         };
 
         var nodeGopath = {
             id: '$GOPATH',
             label: '$GOPATH',
-            borderWidth: 2,
+            borderWidth: 0,
             shape: 'box',
-            font: { size: 18 },
-            margin: 10
+            font: { size: 16,
+            strokeWidth: 3,
+            strokeColor: '#FFE' },
+            chosen: false,
+            shadow: false,
+            mass: 2,
+            title: '<b>$GOPATH</b>',
+            color: {
+                background: 'rgba(0,0,0,0)',
+                border: '#111'
+            }
         };
 
         var nodes = new vis.DataSet([ nodeGopath ]);
