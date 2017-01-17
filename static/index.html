@@ -11,35 +11,71 @@
             height: 100%;
         }
         body {
-            background-color: darkgray;
+            /*background-color: darkgray;*/
             width: 100%;
             height: 100%;
             margin: 0;
         }
-        #goexplorer {
+        #visnetwork {
             height: 100%;
-            width: 100%;
+            width: 70%;
             margin: 0 auto;
             padding: 0;
-            background-color: aliceblue;
+            background-color: #222;
+            /*background-image: 'static/img/cracked.jpg',*/
+            /*background-image: url('static/img/cracked.jpg');
+            background-repeat: repeat;*/
+            float: left;
+        }
+        #background-image {
+          background-image: url('static/img/cracked.jpg');
+          width: 100%;
+          top: 0;
+          left: 0;
+          height:100%;
+          opacity: 0.03;
+          position: fixed;
+          background-repeat: repeat;
+          background-size: auto;
+          padding: 0;
+          margin: 0;
+          z-index:0;
+        }
+        #configurator {
+            font-size: 80%;
+            width: 300px;
         }
   </style>
 </head>
 <body>
-    <div id="goexplorer"></div>
+    <div id="background-image"></div>
+    <div id="visnetwork"></div>
+        <div style="height: 100%;overflow: scroll;">
+    <div id="configurator"></div>
+</div>
 
     <script type="text/javascript" src="static/vendor/vis/vis.js"></script>
     <script type="text/javascript">
+        var container = document.getElementById('visnetwork');
+        var configurator = document.getElementById('configurator');
         var options = {
             nodes: {
                 shape: 'ellipse',
-                font: '12px verdana #222',
-                color: {
-                    border: '#888', background: 'lightgray',
-                    hover: { border: '#05B', background: '' },
-                    highlight: { border: '#F1C40F', background: 'lightyellow' },
+                //font: '12px verdana #000',
+                font: {
+                    color: 'lightcyan',
+                    face: 'verdana',
+                    size: 18,
+                    //strokeWidth: 2,
+                    //strokeColor: 'darkgray',
+                    //mod: 'bold'
                 },
-                //shadow: {size: 5, x: 0, y: 0},
+                color: {
+                    border: '#222', background: 'lightgray',
+                    highlight: { border: '#05B', background: '' },
+                    hover: { border: '#F1C40F', background: 'lightyellow' },
+                },
+                shadow: {size: 5, x: -4, y: -3},
                 chosen: {
                     label:  function(values, id, selected, hovering) {
                         if (hovering) {
@@ -56,7 +92,7 @@
                 }
             },
             edges: {
-                color: { color: '#888', hover: '#05B', highlight: '#d6b225', opacity: 0.5 },
+                color: { color: '#888', hover: '#05B', highlight: '#d6b225', opacity: 0.75 },
                 hoverWidth: function (width) {return width+1;}
             },
             physics: {
@@ -65,38 +101,64 @@
             interaction: {
                 hover: true
             },
-            configure: true
+            configure: {
+                container: configurator,
+            }
         };
 
+        // Gopher
+        var nodeGopher = {
+            id: 'goexplorer',
+            label: 'Gopher',
+            title: '<b>Gopher</b>',
+            shape: 'image',
+            image: './static/img/gopher.png',
+            size: 35,
+            borderWidth: 1,
+            font: { size: 18 },
+            color: {
+                background: 'rgba(0,0,0,0)',
+                border: '#000'
+            }
+        };
+
+        // GOPATH
         var nodeGopath = {
+            hidden: true,
             id: '$GOPATH',
             label: '$GOPATH',
+            title: '# $GOPATH<br>Explore $GOPATH',
             borderWidth: 1,
             shape: 'box',
             font: {
                 size: 16,
-                strokeWidth: 3,
-                strokeColor: '#FFE',
-                mod: 'bold' },
-            chosen: false,
-            //shadow: false,
-            //mass: 2,
-            title: '<b>$GOPATH</b>',
+                strokeWidth: 2,
+                strokeColor: 'snow',
+                mod: 'bold'
+            },
+            //chosen: false,
+            margin: 10,
             color: {
-                background: 'lightyellow',
+                background: 'lightsteelblue',
                 border: '#111'
             }
         };
 
-        var nodes = new vis.DataSet([ nodeGopath ]);
-        var edges = new vis.DataSet([  ]);
+        var nodes = new vis.DataSet([ nodeGopher, nodeGopath ]);
+        var edges = new vis.DataSet([
+            { from: nodeGopher.id, to: nodeGopath.id, color: '#000', opacity: 1, length: 50, hidden: true }
+         ]);
+         var data = { nodes: nodes, edges: edges };
+        var network = new vis.Network(container, data, options);
 
-        var container = document.getElementById('goexplorer');
-        var network = new vis.Network(container, { nodes: nodes, edges: edges }, options);
-
-        network.on('doubleClick', function(data){
+        network.on('click', function(data){
             if (data && data.nodes && data.nodes.length > 0) {
-                updateNode(nodes.get(data.nodes[0]));
+                var node = nodes.get(data.nodes[0]);
+                if (node.id != nodeGopher.id) {
+                    updateNode(node);
+                }else{
+                    network.getConnectedNodes(node);
+                }
             }
         });
 
@@ -128,7 +190,15 @@
                     }
                     var n = {id: dir, label: f.Name, shape: 'box', dir: dir, title: dir};
                     if (f.IsDir) {
-                        n.color = {background: '#BDF'};
+                        n.color = {background: 'lightblue'};
+                    }
+                    if (node.dir===undefined) {
+                        n.shape = 'circularImage';
+                        n.image = 'http://' + dir + '/favicon.ico';
+                        n.brokenImage = '';
+                    }
+                    if (n.Size) {
+                        n.value = n.Size;
                     }
                     nodeList.push(n);
                     var edgeId = node.id + '->' + dir
@@ -140,7 +210,7 @@
             };
             r.send();
         };
-        updateNode(nodeGopath);
+        //updateNode(nodeGopath);
     </script>
 </body>
 </html>
