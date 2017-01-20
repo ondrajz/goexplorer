@@ -3,7 +3,7 @@
 
 **Go Explorer** is a tool to examine Go packages using interactive overview.
 
-![screen](images/screen.png)
+[![screen](images/screen.png)](https://raw.githubusercontent.com/TrueFurby/goexplorer/master/images/screen.png)
 
 ## Introduction
 
