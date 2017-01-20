@@ -1,5 +1,5 @@
-[![Slack](https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg)](https://gophers.slack.com/archives/goexplorer)
 # Go Explorer ![gopher](images/gopher.png)
+[![Slack](https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg)](https://gophers.slack.com/archives/goexplorer)
 
 **Go Explorer** is a tool to examine Go packages using interactive overview.
 
@@ -9,13 +9,13 @@
 
 Purpose of this tool is to provide dynamic visualization of various examinations of Go packages like exploring $GOPATH, viewing dependencies of package or call graph of a program.
 
-**This project is currently at very early stage of development!** :warning:
-
 ### How it works
 
 It has web server that serves the API and web application that uses [vis.js](http://visjs.org/) for visualization inside `<canvas>`.
 
 ## Features
+
+**This project is currently at very early stage of development!** :warning:
 
 - [x] explore hierarchy of $GOPATH
 - [ ] view dependencies of a package
