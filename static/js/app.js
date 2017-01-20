@@ -6,7 +6,7 @@ var options = {
     nodes: {
         font: {
             color: 'white',
-            face: 'verdana',
+            //face: 'arial',
             size: 14,
             strokeWidth: 3,
             strokeColor: 'black',
@@ -42,7 +42,8 @@ var options = {
     groups: {
         topLevels: {
             shape: 'circularImage',
-            size: 25
+            size: 25,
+            color: { background: 'rgba(150,150,150,0.7)' },
         },
         folders: {
             shape: 'icon',
@@ -65,31 +66,16 @@ var options = {
     }
 };
 
-// Gopher
-var nodeGopher = {
-    id: 'goexplorer',
-    title: '<b>gopher</b>',
-    shape: 'image',
-    image: './static/img/gopher.png',
-    size: 15,
-    borderWidth: 1,
-    color: {
-        background: 'rgba(0,0,0,0)',
-        border: 'rgba(0,0,0,0)'
-    }
-};
-
 // GOPATH
 var nodeGopath = {
     id: '$GOPATH',
     label: '$GOPATH',
     title: 'explore $GOPATH',
-    shape: 'text',
+    shape: 'image',
+    image: './static/img/gopher.png',
     font: {
-        color: 'black',
-        size: 16,
-        strokeWidth: 4,
-        strokeColor: 'snow',
+        size: 14,
+        mod: 'bold'
     },
     labelHighlightBold: false,
     color: {
@@ -98,12 +84,8 @@ var nodeGopath = {
     }
 };
 
-var nodes = new vis.DataSet([ nodeGopher, nodeGopath ]);
-var edges = new vis.DataSet([
-    // gopher -> gopath
-    { from: nodeGopher.id, to: nodeGopath.id,
-        color: '#111', width: 0.25, smooth: false }
- ]);
+var nodes = new vis.DataSet([ nodeGopath ]);
+var edges = new vis.DataSet([ ]);
 var visdata = { nodes: nodes, edges: edges };
 var network = new vis.Network(container, visdata, options);
 
@@ -147,10 +129,9 @@ var unhideChildren = function(nodeId) {
 network.on('click', function(data){
     if (data && data.nodes && data.nodes.length > 0) {
         var node = nodes.get(data.nodes[0]);
-        if (node.id === nodeGopher.id) {
-            console.log("click gopher", node);
-            unhideChildren(node.id);
-            return;
+        if (node.id === nodeGopath.id) {
+            console.log("click gopath", node);
+
         }
         updatePath(node);
     }
@@ -182,7 +163,10 @@ var updatePath = function(node) {
                 title: "explore <b>"+file.Loc+"</b>",
                 value: file.Size,
                 dir: file.Loc,
-                font: '12px verdana #D8D8D8',
+                font: {
+                    size: 12,
+                    color: '#D8D8D8',
+                }
             };
             if (file.Type === "topLevel") {
                 n.group = 'topLevels';
@@ -224,4 +208,4 @@ var httpGetJson = function(url, successCb) {
     r.send();
 };
 
-network.selectNodes([nodeGopher.id]);
+//network.selectNodes([nodeGopath.id]);
