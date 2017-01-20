@@ -4,97 +4,120 @@ var configurator = document.getElementById('visconfig');
 // vis config
 var options = {
     nodes: {
-        shape: 'ellipse',
-        //font: '12px verdana #000',
         font: {
-            color: 'lightcyan',
+            color: 'white',
             face: 'verdana',
-            size: 18,
-            //strokeWidth: 2,
-            //strokeColor: 'darkgray',
-            //mod: 'bold'
+            size: 14,
+            strokeWidth: 3,
+            strokeColor: 'black',
         },
         color: {
-            border: '#222', background: 'lightgray',
-            highlight: { border: '#05B', background: '' },
-            hover: { border: '#F1C40F', background: 'lightyellow' },
+            border: '#111',
+            background: 'lightgray',
+            hover: { border: '#05B', background: 'lightblue' },
+            highlight: { border: '#F1C40F', background: 'lightyellow' },
         },
-        shadow: {size: 5, x: -4, y: -3},
-        chosen: {
-            label:  function(values, id, selected, hovering) {
-                if (hovering) {
-                    values.color = '#000';
-                }else{
-                    values.color = '#888';
-                }
-                if (selected) {
-                    values.mod = 'bold';
-                }else{
-                    values.mod = '';
-                }
-              }
-        }
+        shadow: {size: 3, x: -3, y: -2},
     },
     edges: {
-        color: { color: '#888', hover: '#05B', highlight: '#d6b225', opacity: 0.75 },
-        hoverWidth: function (width) {return width+1;}
+        color: {
+            color: '#666',
+            hover: '#05B',
+            highlight: '#d6b225'
+        }
     },
     physics: {
-        stabilization: false
+        stabilization: false,
+        maxVelocity: 35,
+        barnesHut: {
+            avoidOverlap: 0.1
+        }
     },
     interaction: {
         hover: true
     },
     configure: {
         container: configurator,
+    },
+    groups: {
+        topLevels: {
+            shape: 'circularImage',
+            size: 25
+        },
+        folders: {
+            shape: 'icon',
+            icon: {
+                face: 'FontAwesome',
+                size: 25,
+                color: 'lightgray',
+                code: '\uf07b'
+            }
+        },
+        files: {
+            shape: 'icon',
+            icon: {
+                face: 'FontAwesome',
+                size: 20,
+                color: 'dimgray',
+                code: '\uf15b'
+            }
+        }
     }
 };
-
 
 // Gopher
 var nodeGopher = {
     id: 'goexplorer',
-    //label: 'gopher',
     title: '<b>gopher</b>',
     shape: 'image',
     image: './static/img/gopher.png',
-    size: 35,
+    size: 15,
     borderWidth: 1,
-    font: { size: 18 },
     color: {
         background: 'rgba(0,0,0,0)',
-        border: '#000'
+        border: 'rgba(0,0,0,0)'
     }
 };
 
 // GOPATH
 var nodeGopath = {
-    hidden: true,
     id: '$GOPATH',
-    label: 'explore\n$GOPATH',
-    title: '# $GOPATH<br>Explore $GOPATH',
-    borderWidth: 1,
-    shape: 'box',
+    label: '$GOPATH',
+    title: 'explore $GOPATH',
+    shape: 'text',
     font: {
+        color: 'black',
         size: 16,
-        strokeWidth: 2,
+        strokeWidth: 4,
         strokeColor: 'snow',
-        mod: 'bold'
     },
-    //chosen: false,
-    margin: 10,
+    labelHighlightBold: false,
     color: {
-        background: 'lightsteelblue',
+        background: '#888',
         border: '#111'
     }
 };
 
 var nodes = new vis.DataSet([ nodeGopher, nodeGopath ]);
 var edges = new vis.DataSet([
-    { from: nodeGopher.id, to: nodeGopath.id, color: '#000', opacity: 1, length: 50, hidden: true }
+    // gopher -> gopath
+    { from: nodeGopher.id, to: nodeGopath.id,
+        color: '#111', width: 0.25, smooth: false }
  ]);
- var data = { nodes: nodes, edges: edges };
-var network = new vis.Network(container, data, options);
+var visdata = { nodes: nodes, edges: edges };
+var network = new vis.Network(container, visdata, options);
+
+var networkCanvas = container.getElementsByTagName("canvas")[0];
+function changeCursor(newCursorStyle){
+    networkCanvas.style.cursor = newCursorStyle;
+}
+
+network.on('hoverNode', function(){
+    changeCursor('pointer');
+});
+network.on('blurNode', function(){
+    changeCursor('default');
+});
 
 var toggleVisConfig = function() {
     //console.debug("q:", window.location.search);
@@ -105,73 +128,100 @@ var toggleVisConfig = function() {
     container.style.width = '100%';
 };
 
+var unhideChildren = function(nodeId) {
+    var i = 0;
+    var selnodes = network.getConnectedNodes(nodeId);
+    var upnodes = [];
+    for (i=0; i<selnodes.length; i++) {
+        upnodes.push({ id: selnodes[i], hidden: false });
+    }
+    nodes.update(upnodes);
+    var seledges = network.getConnectedEdges(nodeId);
+    var upedges = [];
+    for (i=0; i<seledges.length; i++) {
+        upedges.push({ id: seledges[i], hidden: false });
+    }
+    edges.update(upedges);
+};
+
 network.on('click', function(data){
     if (data && data.nodes && data.nodes.length > 0) {
         var node = nodes.get(data.nodes[0]);
         if (node.id === nodeGopher.id) {
-            var upnodes = [];
-            var selnodes = network.getConnectedNodes(node.id);
-            console.log("click gopher", node, selnodes);
-            for (var i=0; i<selnodes.length; i++) {
-                var sel = selnodes[i];
-                upnodes.push({
-                    id: sel,
-                    hidden: false,
-                });
-            }
-            nodes.update(upnodes);
+            console.log("click gopher", node);
+            unhideChildren(node.id);
             return;
         }
-        updateNode(node);
+        updatePath(node);
     }
 });
 
-var updateNode = function(node) {
+var updatePath = function(node) {
     if (!node) {
         console.log("no node", node);
         return;
     }
-    var r = new XMLHttpRequest();
-    r.responseType = "json";
+
     var p = '?';
     if (node.dir) {
         p += 'dir='+node.dir;
     }
-    console.debug("updateNode:", p);
-    r.open("GET", "/gopath"+p, true);
-    r.onreadystatechange = function () {
-        if (r.readyState != 4 || r.status != 200) return;
-        var data = r.response;
+    console.debug("updatePath:", p);
+
+    httpGetJson("/gopath"+p, function(data){
         console.log("gopath success:", data);
+        var files = data;
+
         var nodeList = [];
         var edgeList = [];
-        //edges.clear();
-        for (var i=0; i<data.length; i++) {
-            var f = data[i];
-            var dir = f.Name;
-            if (node.dir) {
-                dir = node.dir+'/'+dir;
-            }
-            var n = {id: dir, label: f.Name, shape: 'box', dir: dir, title: dir};
-            if (f.IsDir) {
-                n.color = {background: 'lightblue'};
-            }
-            if (node.dir===undefined) {
-                n.shape = 'circularImage';
-                n.image = 'http://' + dir + '/favicon.ico';
-                n.brokenImage = '';
-            }
-            if (n.Size) {
-                n.value = n.Size;
+        for (var i=0; i<files.length; i++) {
+            var file = files[i];
+            var n = {
+                id: file.Id,
+                label: file.Label,
+                title: "explore <b>"+file.Loc+"</b>",
+                value: file.Size,
+                dir: file.Loc,
+                font: '12px verdana #D8D8D8',
+            };
+            if (file.Type === "topLevel") {
+                n.group = 'topLevels';
+                n.image = 'http://' + file.Label + '/favicon.ico';
+                //n.brokenImage = '';
+            }else if (file.Type === "folder") {
+                n.group = 'folders';
+            }else{
+                n.group = 'files';
             }
             nodeList.push(n);
-            var edgeId = node.id + '->' + dir
-            var e = {id: edgeId, from: node.id, to: dir};
+
+            var edgeId = node.id + '->' + file.Id;
+            var e = {id: edgeId, from: node.id, to: file.Id};
             edgeList.push(e);
         }
         nodes.update(nodeList);
         edges.update(edgeList);
+
+        network.selectNodes([node.id]);
+        network.fit({
+            nodes: network.getConnectedNodes(node.id),
+            animation: {
+                duration: 500,
+                easingFunction: 'easeOutQuint'
+            }
+        });
+    });
+};
+
+var httpGetJson = function(url, successCb) {
+    var r = new XMLHttpRequest();
+    r.responseType = "json";
+    r.open("GET", url, true);
+    r.onreadystatechange = function () {
+        if (r.readyState != 4 || r.status != 200) return;
+        successCb(r.response);
     };
     r.send();
 };
-//updateNode(nodeGopath);
+
+network.selectNodes([nodeGopher.id]);

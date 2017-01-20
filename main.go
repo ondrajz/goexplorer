@@ -1,14 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"time"
 )
 
 var (
@@ -17,14 +13,6 @@ var (
 	accessLog = flag.Bool("access", false, "enable access log")
 )
 
-type fileInfo struct {
-	Name    string
-	Size    int64
-	Mode    os.FileMode
-	ModTime time.Time
-	IsDir   bool
-}
-
 func main() {
 	flag.Parse()
 
@@ -32,40 +20,8 @@ func main() {
 		l = log.New(os.Stderr, "", log.Lmicroseconds)
 	}
 
-	http.HandleFunc("/gopath", func(w http.ResponseWriter, r *http.Request) {
-		dir := filepath.Join(os.Getenv("GOPATH"), "src")
-		if str := r.FormValue("dir"); str != "" {
-			dir = filepath.Join(dir, str)
-		}
+	http.HandleFunc("/gopath", gopathHandler)
 
-		files, err := ioutil.ReadDir(dir)
-		if err != nil {
-			logf("ReadDir failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		l := []*fileInfo{}
-		for _, f := range files {
-			l = append(l, &fileInfo{
-				Name:    f.Name(),
-				Size:    f.Size(),
-				Mode:    f.Mode(),
-				ModTime: f.ModTime(),
-				IsDir:   f.IsDir(),
-			})
-		}
-
-		b, err := json.MarshalIndent(l, "", "  ")
-		if err != nil {
-			logf("MarshalIndent failed: %v", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "text/json")
-		w.Write(b)
-	})
 	http.Handle("/static/", http.FileServer(http.Dir(".")))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if *accessLog {
