@@ -1,7 +1,3 @@
-**This project is currently at very early stage of development!** :warning:
-
----
-
 [![Slack](https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg)](https://gophers.slack.com/archives/goexplorer)
 # Go Explorer ![gopher](images/gopher.png)
 
@@ -13,6 +9,8 @@
 
 Purpose of this tool is to provide dynamic visualization of various examinations of Go packages like exploring $GOPATH, viewing dependencies of package or call graph of a program.
 
+**This project is currently at very early stage of development!** :warning:
+
 ### How it works
 
 It has web server that serves the API and web application that uses [vis.js](http://visjs.org/) for visualization inside `<canvas>`.
@@ -23,7 +21,8 @@ It has web server that serves the API and web application that uses [vis.js](htt
 - [ ] view dependencies of a package
 - [ ] show call graph of a program
 
-> Did you find any bugs or have any suggestions? Feel free to open [new issue](https://github.com/TrueFurby/goexplorer/issues/new) or start discussion in our channel at slack.
+
+> did you find any bugs or have any suggestions? Feel free to open [new issue](https://github.com/TrueFurby/goexplorer/issues/new) or start discussion in our channel at slack
 
 ## Installation
 
@@ -39,16 +38,16 @@ Use the following command to install:
 go get -u github.com/TrueFurby/goexplorer
 ```
 
-### Usage
+### Quick start
 
-Start the web server using following command:
+Start the web server using following commands:
 
 ```
 cd $GOPATH/src/github.com/TrueFurby/goexplorer
 goexplorer
 ```
 
-and navigate to http://localhost:8888.
+and go to http://localhost:8888.
 
 > run `goexplorer -h` for usage help
 
