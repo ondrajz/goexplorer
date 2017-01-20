@@ -1,7 +1,7 @@
 # Go Explorer ![gopher](images/gopher.png)
 [![Slack](https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg)](https://gophers.slack.com/archives/goexplorer)
 
-**Go Explorer** is a tool to examine Go packages using interactive overview.
+**Go Explorer** is an experimental tool to dynamically examine Go packages using interactive overview.
 
 [![screen](images/screen.png)](https://raw.githubusercontent.com/TrueFurby/goexplorer/master/images/screen.png)
 
