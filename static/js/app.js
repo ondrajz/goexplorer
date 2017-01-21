@@ -37,10 +37,10 @@ var visoptions = {
     },
     physics: {
         stabilization: false,
-        /*maxVelocity: 35,
+        maxVelocity: 35,
         barnesHut: {
             avoidOverlap: 0.1
-        }*/
+        }
     },
     interaction: {
         hover: true
@@ -51,7 +51,7 @@ var visoptions = {
     groups: {
         topLevels: {
             shape: 'circularImage',
-            size: 18,
+            size: 15,
             color: { background: 'gray', border: '#080808' },
         },
         folders: {
