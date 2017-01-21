@@ -7,9 +7,9 @@
 
 ## Introduction
 
-Purpose of this project is to experiment with visualization of Go packages to aid developers by providing interactive overviews for various analyses. For example; exploring $GOPATH hierarchy, viewing package dependencies, examining call graph of a program, etc.
+Purpose of this project is to experiment with visualization of Go packages to aid developers by providing interactive overviews for various analyses, such as exploring package hierarchy, viewing package dependencies, examining call graph of a program, ..etc.
 
-The initial idea began during development of [**go-callvis**](https://github.com/TrueFurby/go-callvis#roadmap), but I've decided to develop **goexplorer** as a separate project, because I found the name *go-callvis* unfitting for the desired scope.
+> The initial idea began during development of [go-callvis](https://github.com/TrueFurby/go-callvis#roadmap), but I've decided to develop *goexplorer* as a separate project, because name *go-callvis* didn't fit.
 
 ### How it works
 
@@ -56,4 +56,3 @@ and go to http://localhost:8888.
 ## Community
 
 Join the [#goexplorer](https://gophers.slack.com/archives/goexplorer) channel at [gophers.slack.com](http://gophers.slack.com) (*not a member?* [get invitation](https://gophersinvite.herokuapp.com))
-
