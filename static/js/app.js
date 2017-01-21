@@ -26,7 +26,7 @@ var visoptions = {
             hover: { border: '#E5CC67', background: 'lightyellow' },
             highlight: { border: '#5DB9BB', background: 'lightblue' },
         },
-        shadow: {size: 3, x: -3, y: -2},
+        shadow: {size: 2, x: -3, y: -2},
     },
     edges: {
         color: {
@@ -37,10 +37,10 @@ var visoptions = {
     },
     physics: {
         stabilization: false,
-        maxVelocity: 35,
+        /*maxVelocity: 35,
         barnesHut: {
             avoidOverlap: 0.1
-        }
+        }*/
     },
     interaction: {
         hover: true
@@ -55,19 +55,26 @@ var visoptions = {
             color: { background: 'gray', border: '#080808' },
         },
         folders: {
-            shape: 'icon',
+            /*shape: 'icon',
             icon: {
                 face: 'FontAwesome',
                 size: 20,
                 color: 'lightgray',
                 code: '\uf07b'
-            },
+            },*/
+            shape: 'ellipse',
+            color: {background: 'rgba(50,50,50,1)'},
+            font: {
+                color: 'white',
+                //strokeColor: '#f8f8f8',
+                strokeWidth: 3
+            }
         },
         files: {
             shape: 'icon',
             icon: {
                 face: 'FontAwesome',
-                size: 20,
+                size: 15,
                 color: 'dimgray',
                 code: '\uf016'
             },
@@ -76,8 +83,8 @@ var visoptions = {
             shape: 'icon',
             icon: {
                 face: 'FontAwesome',
-                size: 20,
-                color: 'dimgray',
+                size: 15,
+                color: 'SlateGrey',
                 code: '\uf15c'
             },
         },
@@ -86,7 +93,7 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 30,
-                color: 'lightskyblue',
+                color: 'LightSkyBlue',
                 code: '\uf1b2'
             },
         },
@@ -95,8 +102,8 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 30,
-                color: 'MediumSpringGreen',
-                code: '\uf0a3'
+                color: 'PaleGreen',
+                code: '\uf109'
             },
         },
     }
@@ -149,7 +156,7 @@ var nodeGopath = {
         border: '#111'
     },
     size: 22,
-    mass: 10
+    mass: 5
 };
 nodes.add(nodeGopath);
 
@@ -176,11 +183,11 @@ var hideChildren = function(nodeId, hide) {
 
     var theNode = {
         id: nodeId,
-        font: {color: 'rgba(255,255,255,1)', strokeColor: 'rgba(0,0,0,1)'},
+        //font: {color: 'rgba(255,255,255,1)', strokeColor: 'rgba(0,0,0,1)'},
         //icon: {color: 'rgba(200,200,200,1)'}
     };
     if (hide) {
-        theNode.font = {color: 'rgba(200,200,200,0.2)', strokeColor: 'rgba(0,0,0,0.1)'};
+        //theNode.font = {color: 'rgba(200,200,200,0.2)', strokeColor: 'rgba(0,0,0,0.1)'};
         //theNode.icon = {color: 'rgba(128,128,128,0.5)'};
     }
 
@@ -193,16 +200,16 @@ var hideChildren = function(nodeId, hide) {
         }
         var n = {
             id: selnodes[i],
-            font: {color: 'rgba(255,255,255,1)', strokeColor: 'rgba(0,0,0,1)'},
+            //font: {color: 'rgba(255,255,255,1)', strokeColor: 'rgba(0,0,0,1)'},
             //icon: {color: 'rgba(200,200,200,1)'},
-            color: {background: 'rgba(128,128,128,1)', border: 'rgba(128,128,128,1)'},
+            //color: {background: 'rgba(128,128,128,1)', border: 'rgba(128,128,128,1)'},
         };
         if (hide) {
             /*n.oldFont = {
                 color: selnode.font.color,
                 strokeColor: selnode.font.strokeColor,
             };*/
-            n.font = {color: 'rgba(200,200,200,0.5)', strokeColor: 'rgba(0,0,0,0.1)'};
+            //n.font = {color: 'rgba(200,200,200,0.5)', strokeColor: 'rgba(0,0,0,0.1)'};
             //n.icon = {color: 'rgba(128,128,128,0.5)'};
             //n.color = {background: 'rgba(128,128,128,0.25)', border: 'rgba(128,128,128,0.5)'};
         }else{
