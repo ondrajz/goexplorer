@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"go/build"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -16,6 +17,9 @@ const (
 	TopLevel          = "topLevel"
 	Folder            = "folder"
 	File              = "file"
+	Source            = "source"
+	Package           = "package"
+	Program           = "program"
 )
 
 type node struct {
@@ -64,8 +68,15 @@ func gopathHandler(w http.ResponseWriter, r *http.Request) {
 			typ = TopLevel
 		} else if f.IsDir() {
 			typ = Folder
+			if pkg, err := build.Import(loc, "", 0); err == nil {
+				if pkg.Name == "main" {
+					typ = Program
+				} else {
+					typ = Package
+				}
+			}
 		} else {
-			typ = File
+			typ = Source
 		}
 
 		nodes = append(nodes, &node{

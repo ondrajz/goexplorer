@@ -1,29 +1,38 @@
-var container = document.getElementById('visnetwork');
-var configurator = document.getElementById('visconfig');
+//  containers
+var visnetwork = document.getElementById('visnetwork');
+var visconfig = document.getElementById('visconfig');
 
-// vis config
-var options = {
+function toggleConfiguration() {
+    if (visnetwork.style.width !== '70%') {
+        visnetwork.style.width = '70%';
+        return;
+    }
+    visnetwork.style.width = '100%';
+}
+
+// options
+var visoptions = {
     nodes: {
+        shape: 'dot',
         font: {
-            color: 'white',
-            //face: 'arial',
             size: 14,
-            strokeWidth: 3,
+            color: 'white',
             strokeColor: 'black',
+            strokeWidth: 3,
         },
         color: {
-            border: '#111',
-            background: 'lightgray',
-            hover: { border: '#05B', background: 'lightblue' },
-            highlight: { border: '#F1C40F', background: 'lightyellow' },
+            border: '#080808',
+            background: 'gray',
+            hover: { border: '#E5CC67', background: 'lightyellow' },
+            highlight: { border: '#5DB9BB', background: 'lightblue' },
         },
         shadow: {size: 3, x: -3, y: -2},
     },
     edges: {
         color: {
-            color: '#666',
-            hover: '#05B',
-            highlight: '#d6b225'
+            color: '#444',
+            hover: '#E5D594',
+            highlight: '#79B9BB'
         }
     },
     physics: {
@@ -37,22 +46,22 @@ var options = {
         hover: true
     },
     configure: {
-        container: configurator,
+        container: visconfig,
     },
     groups: {
         topLevels: {
             shape: 'circularImage',
-            size: 25,
-            color: { background: 'rgba(150,150,150,0.7)' },
+            size: 18,
+            color: { background: 'gray', border: '#080808' },
         },
         folders: {
             shape: 'icon',
             icon: {
                 face: 'FontAwesome',
-                size: 25,
+                size: 20,
                 color: 'lightgray',
                 code: '\uf07b'
-            }
+            },
         },
         files: {
             shape: 'icon',
@@ -60,40 +69,54 @@ var options = {
                 face: 'FontAwesome',
                 size: 20,
                 color: 'dimgray',
-                code: '\uf15b'
-            }
-        }
+                code: '\uf016'
+            },
+        },
+        sources: {
+            shape: 'icon',
+            icon: {
+                face: 'FontAwesome',
+                size: 20,
+                color: 'dimgray',
+                code: '\uf15c'
+            },
+        },
+        packages: {
+            shape: 'icon',
+            icon: {
+                face: 'FontAwesome',
+                size: 30,
+                color: 'lightskyblue',
+                code: '\uf1b2'
+            },
+        },
+        programs: {
+            shape: 'icon',
+            icon: {
+                face: 'FontAwesome',
+                size: 30,
+                color: 'MediumSpringGreen',
+                code: '\uf0a3'
+            },
+        },
     }
 };
 
-// GOPATH
-var nodeGopath = {
-    id: '$GOPATH',
-    label: '$GOPATH',
-    title: 'explore $GOPATH',
-    shape: 'image',
-    image: './static/img/gopher.png',
-    font: {
-        size: 14,
-        mod: 'bold'
-    },
-    labelHighlightBold: false,
-    color: {
-        background: '#888',
-        border: '#111'
-    }
-};
-
-var nodes = new vis.DataSet([ nodeGopath ]);
+// network
+var nodes = new vis.DataSet([ ]);
 var edges = new vis.DataSet([ ]);
+nodes.on('*', function (event, properties, senderId) {
+  console.info('nodes event:', event, 'properties:', properties, 'senderId:', senderId);
+});
+
 var visdata = { nodes: nodes, edges: edges };
-var network = new vis.Network(container, visdata, options);
+var network = new vis.Network(visnetwork, visdata, visoptions);
 
-var networkCanvas = container.getElementsByTagName("canvas")[0];
-function changeCursor(newCursorStyle){
-    networkCanvas.style.cursor = newCursorStyle;
+// cursor
+var viscanvas = visnetwork.getElementsByTagName("canvas")[0];
+function changeCursor(c){
+    viscanvas.style.cursor = c;
 }
-
 network.on('hoverNode', function(){
     changeCursor('pointer');
 });
@@ -101,44 +124,171 @@ network.on('blurNode', function(){
     changeCursor('default');
 });
 
-var toggleVisConfig = function() {
-    //console.debug("q:", window.location.search);
-    if (container.style.width !== '70%') {
-        container.style.width = '70%';
-        return;
+document.addEventListener('keydown', function(event) {
+    console.debug("keydown", event);
+    if (event.code === 'Delete') {
+        var sel = network.getSelectedNodes();
+        if (sel.length>0) {
+            var id = sel[0];
+            nodes.update({id: id, open: false});
+            removeChildren(id);
+            network.unselectAll();
+        }
     }
-    container.style.width = '100%';
-};
+}, false);
 
-var unhideChildren = function(nodeId) {
+// GOPATH node
+var nodeGopath = {
+    id: '$GOPATH',
+    label: '$GOPATH',
+    title: 'explore $GOPATH',
+    shape: 'image',
+    image: './static/img/gopher.png',
+    color: {
+        background: '#888',
+        border: '#111'
+    },
+    size: 22,
+    mass: 10
+};
+nodes.add(nodeGopath);
+
+var hideChildren = function(nodeId, hide) {
+    console.debug("hideChildren", nodeId, hide);
+    var oldNode = nodes.get(nodeId);
     var i = 0;
-    var selnodes = network.getConnectedNodes(nodeId);
-    var upnodes = [];
-    for (i=0; i<selnodes.length; i++) {
-        upnodes.push({ id: selnodes[i], hidden: false });
-    }
-    nodes.update(upnodes);
-    var seledges = network.getConnectedEdges(nodeId);
+    var parents = {};
+
     var upedges = [];
+    var seledges = network.getConnectedEdges(nodeId);
     for (i=0; i<seledges.length; i++) {
-        upedges.push({ id: seledges[i], hidden: false });
+        var seledge = edges.get(seledges[i]);
+        if (seledge.from !== nodeId) {
+            parents[seledge.from] = true;
+            continue;
+        }
+        var e = { id: seledges[i] };
+        if (hide) {
+            e.color = {opacity: 0.5};
+        }
+        upedges.push(e);
     }
+
+    var theNode = {
+        id: nodeId,
+        font: {color: 'rgba(255,255,255,1)', strokeColor: 'rgba(0,0,0,1)'},
+        //icon: {color: 'rgba(200,200,200,1)'}
+    };
+    if (hide) {
+        theNode.font = {color: 'rgba(200,200,200,0.2)', strokeColor: 'rgba(0,0,0,0.1)'};
+        //theNode.icon = {color: 'rgba(128,128,128,0.5)'};
+    }
+
+    var upnodes = [theNode];
+    var selnodes = network.getConnectedNodes(nodeId);
+    for (i=0; i<selnodes.length; i++) {
+        var selnode = nodes.get(selnodes[i]);
+        if (selnode.id === nodeId || parents[selnode.id] === true) {
+            continue;
+        }
+        var n = {
+            id: selnodes[i],
+            font: {color: 'rgba(255,255,255,1)', strokeColor: 'rgba(0,0,0,1)'},
+            //icon: {color: 'rgba(200,200,200,1)'},
+            color: {background: 'rgba(128,128,128,1)', border: 'rgba(128,128,128,1)'},
+        };
+        if (hide) {
+            /*n.oldFont = {
+                color: selnode.font.color,
+                strokeColor: selnode.font.strokeColor,
+            };*/
+            n.font = {color: 'rgba(200,200,200,0.5)', strokeColor: 'rgba(0,0,0,0.1)'};
+            //n.icon = {color: 'rgba(128,128,128,0.5)'};
+            //n.color = {background: 'rgba(128,128,128,0.25)', border: 'rgba(128,128,128,0.5)'};
+        }else{
+            /*if (selnode.oldFont) {
+                n.font = selnode.oldFont;
+                n.oldFont = undefined;
+            //}else{
+            //    n.font = {};
+        }*/
+        }
+        upnodes.push(n);
+    }
+
+    console.log("upnodes", upnodes);
+
+    nodes.update(upnodes);
     edges.update(upedges);
 };
 
-network.on('click', function(data){
-    if (data && data.nodes && data.nodes.length > 0) {
-        var node = nodes.get(data.nodes[0]);
-        if (node.id === nodeGopath.id) {
-            console.log("click gopath", node);
+var removeChildren = function(nodeId) {
+    console.debug("removeChildren", nodeId);
+    var oldNode = nodes.get(nodeId);
+    var i = 0;
+    var parents = {};
 
+    var upedges = [];
+    var seledges = network.getConnectedEdges(nodeId);
+    for (i=0; i<seledges.length; i++) {
+        var seledge = edges.get(seledges[i]);
+        if (seledge.from !== nodeId) {
+            parents[seledge.from] = true;
+            continue;
         }
-        updatePath(node);
+        upedges.push(seledges[i]);
+    }
+
+    var upnodes = [];
+    var selnodes = network.getConnectedNodes(nodeId);
+    for (i=0; i<selnodes.length; i++) {
+        var selnode = nodes.get(selnodes[i]);
+        if (selnode.id === nodeId || parents[selnode.id] === true) {
+            continue;
+        }
+        if (selnode.open) {
+            removeChildren(selnode.id);
+        }
+        upnodes.push(selnodes[i]);
+    }
+
+    console.log("upnodes", upnodes);
+
+    nodes.remove(upnodes);
+    edges.remove(upedges);
+};
+
+network.on('selectNode', function(data){
+    var node = nodes.get(data.nodes[0]);
+    console.log("selectNode:", node.id, data);
+    updatePath(node);
+});
+
+network.on('deselectNode', function(data){
+    var node = nodes.get(data.previousSelection.nodes[0]);
+    console.log("deselectNode:", node.id, data);
+    clearPath(node);
+});
+
+network.on('dragEnd', function(data){
+    console.log("dragEnd:", data);
+    if (data && data.nodes && data.nodes) {
+
     }
 });
 
+var clearPath = function(node) {
+    if (!node && !node.id) {
+        console.log("no node", node);
+        return;
+    }
+    console.debug("clearPath:", node);
+    hideChildren(node.id, true);
+    //nodes.update([{id: node.id, open: false}]);
+};
+
 var updatePath = function(node) {
-    if (!node) {
+    if (!node && !node.id) {
         console.log("no node", node);
         return;
     }
@@ -147,7 +297,22 @@ var updatePath = function(node) {
     if (node.dir) {
         p += 'dir='+node.dir;
     }
-    console.debug("updatePath:", p);
+
+    hideChildren(node.id, false);
+    network.fit({
+        nodes: network.getConnectedNodes(node.id),
+        animation: {
+            duration: 500,
+            easingFunction: 'easeOutQuint'
+        }
+    });
+
+    var opening = !node.open;
+    console.debug("updatePath:", opening, node);
+    if (!opening) {
+        console.log("not opening", node);
+        return;
+    }
 
     httpGetJson("/gopath"+p, function(data){
         console.log("gopath success:", data);
@@ -160,13 +325,15 @@ var updatePath = function(node) {
             var n = {
                 id: file.Id,
                 label: file.Label,
-                title: "explore <b>"+file.Loc+"</b>",
+                title: "<b>"+file.Loc+"</b>",
                 value: file.Size,
                 dir: file.Loc,
+                hidden: false,
                 font: {
                     size: 12,
-                    color: '#D8D8D8',
-                }
+                    //color: '#D8D8D8',
+                    //strokeColor: '#080808',
+                },
             };
             if (file.Type === "topLevel") {
                 n.group = 'topLevels';
@@ -174,26 +341,38 @@ var updatePath = function(node) {
                 //n.brokenImage = '';
             }else if (file.Type === "folder") {
                 n.group = 'folders';
+            }else if (file.Type === "source"){
+                n.group = 'sources';
+            }else if (file.Type === "package"){
+                n.group = 'packages';
+            }else if (file.Type === "program"){
+                n.group = 'programs';
             }else{
                 n.group = 'files';
             }
             nodeList.push(n);
 
             var edgeId = node.id + '->' + file.Id;
-            var e = {id: edgeId, from: node.id, to: file.Id};
+            var e = {
+                id: edgeId,
+                from: node.id, to: file.Id,
+                hidden: false
+            };
             edgeList.push(e);
         }
+        var par = {
+            id: node.id,
+            open: opening,
+        };
+        nodeList.push(par);
+        /*if (node.imageOpen && opening) {
+            console.log('imageOpen', node.imageOpen);
+            n.image = node.imageOpen;
+        }*/
         nodes.update(nodeList);
         edges.update(edgeList);
 
         network.selectNodes([node.id]);
-        network.fit({
-            nodes: network.getConnectedNodes(node.id),
-            animation: {
-                duration: 500,
-                easingFunction: 'easeOutQuint'
-            }
-        });
     });
 };
 
@@ -208,4 +387,4 @@ var httpGetJson = function(url, successCb) {
     r.send();
 };
 
-//network.selectNodes([nodeGopath.id]);
+//updatePath(nodeGopath);
