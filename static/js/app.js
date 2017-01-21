@@ -68,7 +68,8 @@ var visoptions = {
                 color: 'white',
                 //strokeColor: '#f8f8f8',
                 strokeWidth: 3
-            }
+            },
+            mass: 2
         },
         files: {
             shape: 'icon',
@@ -96,6 +97,7 @@ var visoptions = {
                 color: 'LightSkyBlue',
                 code: '\uf1b2'
             },
+            mass: 3
         },
         programs: {
             shape: 'icon',
@@ -105,6 +107,7 @@ var visoptions = {
                 color: 'PaleGreen',
                 code: '\uf109'
             },
+            mass: 3
         },
     }
 };
@@ -333,7 +336,7 @@ var updatePath = function(node) {
                 id: file.Id,
                 label: file.Label,
                 title: "<b>"+file.Loc+"</b>",
-                value: file.Size,
+                value: file.Value,
                 dir: file.Loc,
                 hidden: false,
                 font: {
