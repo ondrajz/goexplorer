@@ -17,7 +17,7 @@ var visoptions = {
         font: {
             size: 14,
             color: 'white',
-            strokeColor: 'rgba(5,5,5,0.75)',
+            strokeColor: 'rgba(0,0,0,0.9)',
             strokeWidth: 3
         },
         color: {
@@ -26,7 +26,7 @@ var visoptions = {
             hover: { border: '#E5CC67', background: 'lightyellow' },
             highlight: { border: '#5DB9BB', background: 'lightblue' },
         },
-        shadow: {size: 2, x: -3, y: -2},
+        shadow: {size: 3, x: -3, y: -3},
     },
     edges: {
         color: {
@@ -36,8 +36,8 @@ var visoptions = {
         }
     },
     physics: {
-        stabilization: false,
-        maxVelocity: 35,
+        //stabilization: false,
+        maxVelocity: 30,
         barnesHut: {
             avoidOverlap: 0.1
         }
@@ -55,20 +55,20 @@ var visoptions = {
             color: { background: 'rgba(128,128,128,0.75)', border: '#080808' },
         },
         folders: {
-            /*shape: 'icon',
+            shape: 'icon',
             icon: {
                 face: 'FontAwesome',
                 size: 20,
                 color: 'lightgray',
                 code: '\uf07b'
-            },*/
-            shape: 'ellipse',
+            },
+            /*shape: 'ellipse',
             color: {background: 'rgba(128,128,128,1)'},
             font: {
                 color: 'white',
                 //strokeColor: '#f8f8f8',
                 strokeWidth: 3
-            },
+            },*/
             mass: 2
         },
         files: {
@@ -85,7 +85,7 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 15,
-                color: 'SlateGrey',
+                color: 'lightskyblue',
                 code: '\uf15c'
             },
         },
@@ -343,6 +343,8 @@ var updatePath = function(node) {
         return;
     }
 
+    var nodePos = network.getPositions(node.id);
+
     httpGetJson("/gopath"+p, function(data){
         console.log("gopath success:", data);
         var files = data;
@@ -363,6 +365,8 @@ var updatePath = function(node) {
                     //color: '#D8D8D8',
                     //strokeColor: '#080808',
                 },
+                x: nodePos.x,
+                y: nodePos.y
             };
             if (file.Type === "topLevel") {
                 n.group = 'topLevels';
