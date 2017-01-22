@@ -16,9 +16,9 @@ var visoptions = {
         shape: 'dot',
         font: {
             size: 14,
-            //color: 'white',
+            color: 'rgba(0,0,0,1)',
             strokeColor: 'rgba(250,250,250,1)',
-            strokeWidth: 2
+            strokeWidth: 3
         },
         color: {
             border: '#080808',
