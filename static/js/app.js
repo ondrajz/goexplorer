@@ -16,9 +16,9 @@ var visoptions = {
         shape: 'dot',
         font: {
             size: 14,
-            color: 'white',
-            strokeColor: 'rgba(0,0,0,0.9)',
-            strokeWidth: 3
+            //color: 'white',
+            strokeColor: 'rgba(250,250,250,1)',
+            strokeWidth: 2
         },
         color: {
             border: '#080808',
@@ -26,7 +26,7 @@ var visoptions = {
             hover: { border: '#E5CC67', background: 'lightyellow' },
             highlight: { border: '#5DB9BB', background: 'lightblue' },
         },
-        shadow: {size: 3, x: -3, y: -3},
+        shadow: {size: 4, x: -3, y: -3, color: 'rgba(0,0,0,0.4)'},
     },
     edges: {
         color: {
@@ -59,7 +59,7 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 20,
-                color: 'lightgray',
+                color: 'darkgray',
                 code: '\uf07b'
             },
             /*shape: 'ellipse',
@@ -112,7 +112,7 @@ var visoptions = {
         objects: {
             shape: 'box',
             color: {
-                background: 'lightblue'
+                background: 'aliceblue'
             },
             font: {
                 color: '#111',
