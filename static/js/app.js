@@ -17,8 +17,8 @@ var visoptions = {
         font: {
             size: 14,
             color: 'white',
-            strokeColor: 'black',
-            strokeWidth: 3,
+            strokeColor: 'rgba(5,5,5,0.75)',
+            strokeWidth: 3
         },
         color: {
             border: '#080808',
@@ -51,7 +51,7 @@ var visoptions = {
     groups: {
         topLevels: {
             shape: 'circularImage',
-            size: 15,
+            size: 14,
             color: { background: 'rgba(128,128,128,0.75)', border: '#080808' },
         },
         folders: {
@@ -109,6 +109,22 @@ var visoptions = {
             },
             mass: 3
         },
+        objects: {
+            shape: 'box',
+            color: {
+                background: 'lightblue'
+            },
+            font: {
+                color: '#111',
+                multi: true,
+                strokeWidth: 0,
+                mono: {
+                    color: '#444',
+                    size: 10,
+                    //vadjust: 0
+                }
+            }
+        },
     }
 };
 
@@ -159,7 +175,8 @@ var nodeGopath = {
         border: '#111'
     },
     size: 22,
-    mass: 5
+    mass: 5,
+    dir: '.'
 };
 nodes.add(nodeGopath);
 
@@ -271,7 +288,9 @@ var removeChildren = function(nodeId) {
 network.on('selectNode', function(data){
     var node = nodes.get(data.nodes[0]);
     console.log("selectNode:", node.id, data);
-    updatePath(node);
+    if (node.dir) {
+        updatePath(node);
+    }
 });
 
 network.on('deselectNode', function(data){
@@ -357,6 +376,8 @@ var updatePath = function(node) {
                 n.group = 'packages';
             }else if (file.Type === "program"){
                 n.group = 'programs';
+            }else if (file.Type === "object"){
+                n.group = 'objects';
             }else{
                 n.group = 'files';
             }

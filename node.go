@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"go/build"
+	"go/parser"
+	"go/token"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -20,6 +23,7 @@ const (
 	Source            = "source"
 	Package           = "package"
 	Program           = "program"
+	Object            = "object"
 )
 
 type node struct {
@@ -41,52 +45,75 @@ func gopathHandler(w http.ResponseWriter, r *http.Request) {
 		dir = filepath.Join(dir, str)
 	}
 
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		logf("ReadDir failed: %v", err)
+	nodes := []*node{}
+	if file, err := os.Stat(dir); err != nil {
+		logf("Stat for %q failed: %v", dir, err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	}
-	nodes := []*node{}
-	for _, f := range files {
-		base := filepath.Base(f.Name())
-		// omit hidden files
-		if strings.HasPrefix(base, ".") {
-			continue
+	} else if !file.IsDir() && filepath.Ext(file.Name()) == ".go" {
+		fset := token.NewFileSet()
+		af, err := parser.ParseFile(fset, dir, nil, 0)
+		if err != nil {
+			logf("ParseFile for %q failed: %v", dir, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
-
-		path := filepath.Join(dir, f.Name())
-		// omit non .go files
-		if !f.IsDir() && filepath.Ext(path) != ".go" {
-			continue
+		for _, v := range af.Scope.Objects {
+			nodes = append(nodes, &node{
+				Id:    fmt.Sprint(v.Pos()),
+				Label: fmt.Sprintf("<code>%s</code>\n%s", v.Kind, v.Name),
+				Type:  Object,
+				Dir:   dir,
+			})
 		}
-
-		loc, _ := filepath.Rel(dirSrc, path)
-
-		var typ NodeType
-		if dir == dirSrc {
-			typ = TopLevel
-		} else if f.IsDir() {
-			typ = Folder
-			if pkg, err := build.Import(loc, "", 0); err == nil {
-				if pkg.Name == "main" {
-					typ = Program
-				} else {
-					typ = Package
-				}
-			}
+	} else {
+		files, err := ioutil.ReadDir(dir)
+		if err != nil {
+			logf("ReadDir for %q failed: %v", dir, err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		} else {
-			typ = Source
-		}
+			for _, f := range files {
+				base := filepath.Base(f.Name())
+				// omit hidden files
+				if strings.HasPrefix(base, ".") {
+					continue
+				}
 
-		nodes = append(nodes, &node{
-			Id:    path,
-			Label: f.Name(),
-			Value: f.Size(),
-			Loc:   loc,
-			Dir:   dir,
-			Type:  typ,
-		})
+				path := filepath.Join(dir, f.Name())
+				// omit non .go files
+				if !f.IsDir() && filepath.Ext(path) != ".go" {
+					continue
+				}
+
+				loc, _ := filepath.Rel(dirSrc, path)
+
+				var typ NodeType
+				if dir == dirSrc {
+					typ = TopLevel
+				} else if f.IsDir() {
+					typ = Folder
+					if pkg, err := build.Import(loc, "", 0); err == nil {
+						if pkg.Name == "main" {
+							typ = Program
+						} else {
+							typ = Package
+						}
+					}
+				} else {
+					typ = Source
+				}
+
+				nodes = append(nodes, &node{
+					Id:    path,
+					Label: f.Name(),
+					Value: f.Size(),
+					Loc:   loc,
+					Dir:   dir,
+					Type:  typ,
+				})
+			}
+		}
 	}
 
 	b, err := json.MarshalIndent(nodes, "", "  ")
