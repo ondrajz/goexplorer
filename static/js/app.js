@@ -52,7 +52,7 @@ var visoptions = {
         topLevels: {
             shape: 'circularImage',
             size: 15,
-            color: { background: 'gray', border: '#080808' },
+            color: { background: 'rgba(128,128,128,0.75)', border: '#080808' },
         },
         folders: {
             /*shape: 'icon',
@@ -63,7 +63,7 @@ var visoptions = {
                 code: '\uf07b'
             },*/
             shape: 'ellipse',
-            color: {background: 'rgba(50,50,50,1)'},
+            color: {background: 'rgba(128,128,128,1)'},
             font: {
                 color: 'white',
                 //strokeColor: '#f8f8f8',
@@ -94,7 +94,7 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 30,
-                color: 'LightSkyBlue',
+                color: '#78CCFF',
                 code: '\uf1b2'
             },
             mass: 3
@@ -104,7 +104,7 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 30,
-                color: 'PaleGreen',
+                color: '#76C476',
                 code: '\uf109'
             },
             mass: 3
