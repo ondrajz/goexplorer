@@ -1,6 +1,6 @@
-<div align="center"><img src="images/gopher.png" alt="GTM Logo"></div>
+<p align="center"><img src="images/gopher.png" alt="gopher"></p>
 # <div align="center">Go Explorer</div>
-[![Slack](https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg)](https://gophers.slack.com/archives/goexplorer)
+<p align="center"><img src="https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg" href="https://gophers.slack.com/archives/goexplorer" alt="gophers.slack.com"></p>
 
 **Go Explorer** is an experimental tool to dynamically visualize Go packages using interactive overview.
 
@@ -61,5 +61,7 @@ Nodes with green laptop icon represent programs and nodes with blue box icon rep
 
 Join the [#goexplorer](https://gophers.slack.com/archives/goexplorer) channel at [gophers.slack.com](http://gophers.slack.com) (*not a member?* [get invitation](https://gophersinvite.herokuapp.com))
 
+
 ---
-> did you find any bugs or have any suggestions? Feel free to open [new issue](https://github.com/TrueFurby/goexplorer/issues/new) or start discussion in our channel at slack
+
+> Did you find any bugs or have any suggestions? Feel free to open [new issue](https://github.com/TrueFurby/goexplorer/issues/new) or start discussion in the slack channel.
