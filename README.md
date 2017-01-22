@@ -1,6 +1,6 @@
-<p align="center"><img src="images/gopher.png" alt="gopher"></p>
+<div align="center"><img src="images/gopher.png" alt="gopher"></br><img src="https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg" href="https://gophers.slack.com/archives/goexplorer" alt="gophers.slack.com"></div>
+
 # <div align="center">Go Explorer</div>
-<p align="center"><img src="https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg" href="https://gophers.slack.com/archives/goexplorer" alt="gophers.slack.com"></p>
 
 **Go Explorer** is an experimental tool to dynamically visualize Go packages using interactive overview.
 
