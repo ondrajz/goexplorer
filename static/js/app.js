@@ -105,7 +105,7 @@ var visoptions = {
                 face: 'FontAwesome',
                 size: 30,
                 color: '#76C476',
-                code: '\uf109'
+                code: '\uf069'
             },
             mass: 3
         },
