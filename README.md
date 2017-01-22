@@ -1,6 +1,6 @@
 <p align="center">
   <img src="images/gopher.png" alt="gopher"></br>
-  <a target="_blank" href="https://gophers.slack.com/archives/goexplorer"><img src="https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg" alt="gophers.slack.com#goexplorer"></a>
+  <a href="https://gophers.slack.com/archives/goexplorer"><img src="https://img.shields.io/badge/gophers%20slack-%23goexplorer-ff69b4.svg" alt="gophers.slack.com#goexplorer"></a>
 </p>
 
 # <div align="center">Go Explorer</div>
