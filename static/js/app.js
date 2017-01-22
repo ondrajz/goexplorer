@@ -119,9 +119,9 @@ var visoptions = {
                 multi: true,
                 strokeWidth: 0,
                 mono: {
-                    color: '#444',
+                    color: '#333',
                     size: 10,
-                    //vadjust: 0
+                    vadjust: 0
                 }
             }
         },
