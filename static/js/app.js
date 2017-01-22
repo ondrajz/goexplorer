@@ -23,16 +23,16 @@ var visoptions = {
         color: {
             border: '#080808',
             background: 'gray',
-            hover: { border: '#E5CC67', background: 'lightyellow' },
-            highlight: { border: '#5DB9BB', background: 'lightblue' },
+            hover: { border: '#cbb55b', background: 'lightyellow' },
+            highlight: { border: '#5d9cbb', background: 'lightblue' },
         },
         shadow: {size: 4, x: -3, y: -3, color: 'rgba(0,0,0,0.4)'},
     },
     edges: {
         color: {
             color: '#444',
-            hover: '#E5D594',
-            highlight: '#79B9BB'
+            hover: '#b09f5b',
+            highlight: '#598696'
         }
     },
     physics: {
@@ -94,7 +94,7 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 30,
-                color: '#78CCFF',
+                color: 'RoyalBlue',
                 code: '\uf1b2'
             },
             mass: 3
@@ -104,7 +104,7 @@ var visoptions = {
             icon: {
                 face: 'FontAwesome',
                 size: 30,
-                color: '#76C476',
+                color: 'LightSeaGreen',
                 code: '\uf069'
             },
             mass: 3
