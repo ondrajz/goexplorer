@@ -125,6 +125,22 @@ var visoptions = {
                 }
             }
         },
+        funcs: {
+            shape: 'ellipse',
+            color: {
+                background: 'lightblue'
+            },
+            font: {
+                color: '#050505',
+                multi: true,
+                strokeWidth: 1,
+                mono: {
+                    color: '#333',
+                    size: 10,
+                    vadjust: 0
+                }
+            }
+        },
     }
 };
 
@@ -345,20 +361,21 @@ var updatePath = function(node) {
 
     var nodePos = network.getPositions(node.id);
 
-    httpGetJson("/gopath"+p, function(data){
+    httpGetJson("/deps"+p, function(data){
         console.log("gopath success:", data);
-        var files = data;
+        var dnodes = data.Nodes;
+        var dedges = data.Edges;
 
         var nodeList = [];
         var edgeList = [];
-        for (var i=0; i<files.length; i++) {
-            var file = files[i];
-            var n = {
-                id: file.Id,
-                label: file.Label,
-                title: "<b>"+file.Loc+"</b>",
-                value: file.Value,
-                dir: file.Loc,
+
+        var addNode = function(node) {
+            var vnode = {
+                id: node.Id,
+                label: node.Label,
+                title: "<b>"+node.Loc+"</b>",
+                value: node.Value,
+                dir: node.Loc,
                 hidden: false,
                 font: {
                     size: 12,
@@ -368,41 +385,66 @@ var updatePath = function(node) {
                 x: nodePos.x,
                 y: nodePos.y
             };
-            if (file.Type === "topLevel") {
-                n.group = 'topLevels';
-                n.image = 'http://' + file.Label + '/favicon.ico';
-                //n.brokenImage = '';
-            }else if (file.Type === "folder") {
-                n.group = 'folders';
-            }else if (file.Type === "source"){
-                n.group = 'sources';
-            }else if (file.Type === "package"){
-                n.group = 'packages';
-            }else if (file.Type === "program"){
-                n.group = 'programs';
-            }else if (file.Type === "object"){
-                n.group = 'objects';
+            if (node.Type === "topLevel") {
+                vnode.group = 'topLevels';
+                vnode.image = 'http://' + node.Label + '/favicon.ico';
+                //vnode.brokenImage = '';
+            }else if (node.Type === "folder") {
+                vnode.group = 'folders';
+            }else if (node.Type === "source"){
+                vnode.group = 'sources';
+            }else if (node.Type === "package"){
+                vnode.group = 'packages';
+            }else if (node.Type === "program"){
+                vnode.group = 'programs';
+            }else if (node.Type === "object"){
+                vnode.group = 'objects';
+            }else if (node.Type === "func"){
+                vnode.group = 'funcs';
             }else{
-                n.group = 'files';
+                vnode.group = 'files';
             }
-            nodeList.push(n);
+            nodeList.push(vnode);
 
-            var edgeId = node.id + '->' + file.Id;
-            var e = {
+            /*for (var i=0; i<node.Nodes.length; i++) {
+                var child = node.Nodes[i];
+                var edgeId = node.id + '->' + child.Id;
+                var e = {
+                    id: edgeId,
+                    from: node.id, to: child.Id,
+                    hidden: false
+                };
+                edgeList.push(e);
+            }*/
+        };
+        var addNodes = function(files) {
+            for (var i=0; i<files.length; i++) {
+                var node = files[i];
+                addNode(node);
+                //addNodes(node.Nodes);
+            }
+        };
+        addNodes(dnodes);
+
+        for (var i=0; i<dedges.length; i++) {
+            var e = dedges[i];
+            var edgeId = e.From + '->' + e.To;
+            var ee = {
                 id: edgeId,
-                from: node.id, to: file.Id,
-                hidden: false
+                from: e.From, to: e.To,
+                hidden: false, arrows: 'to',
             };
-            edgeList.push(e);
+            edgeList.push(ee);
         }
-        var par = {
-            id: node.id,
+
+        /*var par = {
+            id: main.id,
             open: opening,
         };
-        nodeList.push(par);
+        nodeList.push(par);*/
         /*if (node.imageOpen && opening) {
             console.log('imageOpen', node.imageOpen);
-            n.image = node.imageOpen;
+            vnode.image = node.imageOpen;
         }*/
         nodes.update(nodeList);
         edges.update(edgeList);
