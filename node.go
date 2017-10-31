@@ -126,3 +126,30 @@ func gopathHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/json")
 	w.Write(b)
 }
+
+func depsHandler(w http.ResponseWriter, r *http.Request) {
+	str := r.FormValue("pkg")
+	if str == "" {
+		http.Error(w, "pkg missing", http.StatusInternalServerError)
+		return
+	}
+	std := r.FormValue("std")
+	noStd := std == ""
+
+	deps, err := GetDeps(str, noStd)
+	if err != nil {
+		logf("GetDeps failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	b, err := json.MarshalIndent(deps, "", "  ")
+	if err != nil {
+		logf("MarshalIndent failed: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/json")
+	w.Write(b)
+}

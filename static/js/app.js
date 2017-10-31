@@ -89,6 +89,17 @@ var visoptions = {
                 code: '\uf15c'
             },
         },
+        deps: {
+            shape: 'bigbox',
+            color: { background: 'Salmon', border: '#080808' },
+            /*icon: {
+                face: 'FontAwesome',
+                size: 26,
+                color: 'Salmon',
+                code: '\uf1b2'
+            },*/
+            mass: 5
+        },
         packages: {
             shape: 'icon',
             icon: {
@@ -138,6 +149,34 @@ nodes.on('*', function (event, properties, senderId) {
 var visdata = { nodes: nodes, edges: edges };
 var network = new vis.Network(visnetwork, visdata, visoptions);
 
+var nodes2 = new vis.DataSet([ ]);
+var edges2 = new vis.DataSet([ ]);
+
+var visdata2 = { nodes: nodes2, edges: edges2 };
+var visoptions2 = {
+    edges: {
+        smooth: true/*{
+            type: "cubicBezier",
+            forceDirection: 'vertical',
+            roundness: 0.5
+        }*/,
+        arrows: {to : true }
+    },
+    layout: {
+        hierarchical: {
+            direction: "LR",
+            nodeSpacing: 50,
+            sortMethod: 'directed'
+        }
+    },
+    physics: {
+        hierarchicalRepulsion: {
+            nodeDistance: 60
+        } 
+    }
+};
+var network2 = new vis.Network(visnetwork2, visdata2, visoptions2);
+
 // cursor
 var viscanvas = visnetwork.getElementsByTagName("canvas")[0];
 function changeCursor(c){
@@ -159,6 +198,15 @@ document.addEventListener('keydown', function(event) {
             nodes.update({id: id, open: false});
             removeChildren(id);
             network.unselectAll();
+        }
+    }else if (event.code === 'Enter') {
+        var sel = network.getSelectedNodes();
+        if (sel.length>0) {
+            var n = nodes.get(sel[0]);
+            if (n.group=="programs" || n.group=="packages") {
+                console.log("deps for", n);
+                depsFor(n);
+            }
         }
     }
 }, false);
@@ -299,12 +347,76 @@ network.on('deselectNode', function(data){
     clearPath(node);
 });
 
+network.on('doubleClick', function(data){
+    console.log("doubleClick:", data);
+    if (data && data.nodes) {
+        var n = nodes.get(data.nodes[0]);
+
+    }
+});
+
 network.on('dragEnd', function(data){
     console.log("dragEnd:", data);
     if (data && data.nodes && data.nodes) {
 
     }
 });
+
+var depsFor = function(node) {
+    var p = '?';
+    p += 'pkg='+node.dir;
+
+    httpGetJson("/deps"+p, function(data){
+        console.log("deps success:", data);
+        var files = data;
+
+        var nodeList = [];
+        var edgeList = [];
+        for (var i=0; i<files.length; i++) {
+            var file = files[i];
+            var n = {
+                id: file.Id,
+                group: 'deps',
+                label: file.Label,
+                title: "<b>"+file.Loc+"</b>",
+                //value: file.Value,
+                dir: file.Loc,
+                hidden: false,
+                font: {
+                    size: 12,
+                    //color: '#D8D8D8',
+                    //strokeColor: '#080808',
+                },
+                //x: nodePos.x,
+                //y: nodePos.y
+            };
+            nodeList.push(n);
+
+            var edgeId = node.dir + '->' + file.Id;
+            var e = {
+                id: edgeId,
+                from: node.dir, to: file.Id,
+                hidden: false
+            };
+            edgeList.push(e);
+        }
+        var par = {
+            id: node.dir,
+            group: 'deps',
+            label: node.label,
+        };
+        nodeList.push(par);
+        /*if (node.imageOpen && opening) {
+            console.log('imageOpen', node.imageOpen);
+            n.image = node.imageOpen;
+        }*/
+        nodes2.update(nodeList);
+        edges2.update(edgeList);
+
+        network2.selectNodes([node.dir]);
+        network2.fit();
+    });
+};
 
 var clearPath = function(node) {
     if (!node && !node.id) {

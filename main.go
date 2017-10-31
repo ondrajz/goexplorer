@@ -8,19 +8,21 @@ import (
 )
 
 var (
-	webAddr   = flag.String("web", ":8888", "web server address")
-	verbose   = flag.Bool("verbose", false, "enable verbose log")
-	accessLog = flag.Bool("access", false, "enable access log")
+	httpFlag    = flag.String("web", ":8085", "web server address")
+	verboseFlag = flag.Bool("verbose", false, "enable verbose log")
+	accessLog   = flag.Bool("access", false, "enable access log")
 )
+
+var l *log.Logger
 
 func main() {
 	flag.Parse()
-
-	if *verbose {
+	if *verboseFlag {
 		l = log.New(os.Stderr, "", log.Lmicroseconds)
 	}
 
 	http.HandleFunc("/gopath", gopathHandler)
+	http.HandleFunc("/deps", depsHandler)
 
 	http.Handle("/static/", http.FileServer(http.Dir(".")))
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -28,21 +30,19 @@ func main() {
 			log.Printf(`- %v "%s %s"`, r.RemoteAddr, r.Method, r.URL.Path)
 		}
 
-		if r.URL.Path == "/" {
-			http.ServeFile(w, r, "static/index.html")
+		if r.URL.Path != "/" {
+			http.NotFound(w, r)
 			return
 		}
 
-		http.NotFound(w, r)
+		http.ServeFile(w, r, "static/index.html")
 	})
 
-	logf("serving at %s", *webAddr)
-	if err := http.ListenAndServe(*webAddr, nil); err != nil {
+	logf("serving at %v", *httpFlag)
+	if err := http.ListenAndServe(*httpFlag, nil); err != nil {
 		log.Fatal(err)
 	}
 }
-
-var l *log.Logger
 
 func logf(f string, a ...interface{}) {
 	if l != nil {
